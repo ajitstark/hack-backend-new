@@ -41,15 +41,15 @@ router.patch('/rightsStatus/update/:rights_status_id',authMiddleware,rightsStatu
 router.delete('/rightsStatus/delete/:rights_status_id',authMiddleware,rightsStatusController.DeleteRightsStatus);
 
 //Rights Routes
-router.post('/rights', authMiddleware, rightsController.createRights);
+router.post('/rights', authMiddleware, rightsController.createUserRights);
 //router.get('/rights/view',authMiddleware, rightsController.ViewRights);
-router.get('/rights/FineOne',authMiddleware, rightsController.RightsFindOne); 
-router.patch('/rights/update/:rights_id',authMiddleware, rightsController.UpdateRights);
-router.delete('/rights/delete/:rights_id',authMiddleware, rightsController.DeleteRights);
+router.get('/rights/FineOne',authMiddleware, rightsController.userRightsFindOne); 
+router.patch('/rights/update/:rights_id',authMiddleware, rightsController.UpdateUserRights);
+router.delete('/rights/delete/:rights_id',authMiddleware, rightsController.DeleteUserRights);
 
 //Project Routes
 router.post('/project',authMiddleware, projectController.createProject);
-router.get('/project/view',authMiddleware,projectController.ViewProject);
+router.get('/project/view',authMiddleware,projectController.ViewProjects);
 router.get('/project/FindOne',authMiddleware,projectController.projectFindOne);
 router.patch('/project/update/:project_id',authMiddleware,projectController.UpdateProject);
 router.delete('/project/delete/:project_id',authMiddleware,projectController.DeleteProject);
@@ -78,5 +78,5 @@ router.delete('/user_permission/delete/:user_permission_id', authMiddleware, use
 
 //Reports Routes 
 router.get('/report/taskList', authMiddleware, userReports.TaskList);
-
+router.get('/report/statusList', authMiddleware, userReports.listRightsStatus);
 module.exports = router;
