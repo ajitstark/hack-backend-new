@@ -5,8 +5,17 @@ const bcrypt = require('bcrypt')
 // Get all users
 exports.getUsers = async (req, res) => {
   try {
-    const [rows] = await db.query('SELECT * FROM users');
-    res.json(rows);
+
+    let userId = req.user.id
+
+    const [companyUserId] = await db.query('SELECT company_user_id FROM users WHERE users_id = ?', [userId]);
+
+    let newCompanyUserId = companyUserId[0].company_user_id
+
+    const [resultUsers] = await db.query('SELECT * FROM users WHERE company_user_id = ?', [newCompanyUserId]);
+
+    return res.status(200).json({ status: 1, message: "fetched successfully", users: resultUsers });
+
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Internal Server Error' });
@@ -81,7 +90,7 @@ exports.createUser = async (req, res) => {
       // Generate a new JWT token
       //const newToken = jwt.sign({ id: result.insertId, company_user_id, user_name, email }, process.env.JWT_SECRET, { expiresIn: '1h' });
 
-      return res.status(201).json({ id: result.insertId, company_user_id: companyUserId, user_name, email });
+      return res.status(201).json({ status: 1, message: "User created successfully", data: {id: result.insertId, company_user_id: companyUserId, user_name, email} });
   } catch (err) {
       console.error(err);
       return res.status(500).json({ error: 'Internal Server Error' });
