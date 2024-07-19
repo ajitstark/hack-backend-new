@@ -167,6 +167,7 @@ exports.createTaskTimeTracker = async (req, res) => {
     }
 };
 
+
 // View Task Time Trackers
 exports.ViewTaskTimeTrackers = async (req, res) => {
     const user_id = req.user.id; // Get user_id from session
@@ -185,3 +186,61 @@ exports.ViewTaskTimeTrackers = async (req, res) => {
         res.status(500).json({ error: 'Internal Server Error' });
     }
 };
+// Function to get the current time in MySQL format with a specific timezone offset
+function getCurrentTimeWithOffset(offsetHours) {
+    const date = new Date();
+    const utc = date.getTime() + (date.getTimezoneOffset() * 60000);
+    const newDate = new Date(utc + (3600000 * offsetHours));
+    return newDate.toISOString().slice(0, 19).replace('T', ' ');
+}
+
+// Update Rights Status and Add Task Time Tracker Entry
+exports.updateRightsStatus = async (req, res) => {
+    const { rights_status_id_from, rights_status_id_to, task_id, user_id, comment } = req.body;
+    const company_userid = req.user.company_user_id; // Get company_userid from req.user.company_user_id
+
+    if (!rights_status_id_from || !rights_status_id_to || !task_id || !user_id || !company_userid) {
+        return res.status(400).json({ error: 'Missing required fields' });
+    }
+
+    const offsetHours = 5.5; // Adjust this to your desired timezone offset
+    const currentTime = getCurrentTimeWithOffset(offsetHours); // Get the current time with offset
+
+    const connection = await db.getConnection();
+    await connection.beginTransaction();
+
+    try {
+        // Check if the current rights_status_id matches rights_status_id_from
+        const [task] = await connection.query('SELECT * FROM task_master WHERE task_master_id = ? AND rights_status_id = ? AND company_userid = ?', [task_id, rights_status_id_from, company_userid]);
+
+        if (task.length === 0) {
+            await connection.rollback();
+            connection.release();
+            return res.status(404).json({ error: 'Task not found or current rights status does not match' });
+        }
+
+        // Update rights_status_id in task_master
+        await connection.query('UPDATE task_master SET rights_status_id = ? WHERE task_master_id = ? AND company_userid = ?', [rights_status_id_to, task_id, company_userid]);
+
+        // Insert into task_time_tracker with adjusted current time as start_time
+        const [timeTrackerResult] = await connection.query(`
+            INSERT INTO task_time_tracker (task_master_id, user_id, rights_status_id, comment, start_time)
+            VALUES (`+task_id+`, `+user_id+`, `+rights_status_id_to+`, '`+comment+`', CURRENT_TIMESTAMP())
+         `);
+
+        await connection.commit();
+        connection.release();
+
+        return res.status(200).json({ message: 'Rights status updated and task time tracker entry added successfully', task_master_id: task_id, task_time_tracker_id: timeTrackerResult.insertId });
+    } catch (err) {
+        await connection.rollback();
+        connection.release();
+        console.error(err);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+};
+
+
+
+
+

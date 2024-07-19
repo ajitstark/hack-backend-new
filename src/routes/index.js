@@ -67,6 +67,9 @@ router.get('/task/view', authMiddleware, taskController.ViewTasks);
 router.get('/task/findone', authMiddleware, taskController.taskFindOne);
 router.patch('/task/update/:task_id', authMiddleware, taskController.UpdateTask);
 router.delete('/task/delete/:task_id', authMiddleware, taskController.DeleteTask);
+router.post('/task/update_rights_status', authMiddleware, taskController.updateRightsStatus);
+router.post('/task_time_tracker', authMiddleware, taskController.createTaskTimeTracker);
+router.get('/task_time_tracker/view', authMiddleware, taskController.ViewTaskTimeTrackers);
 
 //user_permission Routes
 router.post('/user_permission', authMiddleware, userPermissionController.createUserPermission);
