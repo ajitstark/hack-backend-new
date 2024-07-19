@@ -9,6 +9,11 @@ const companyUserController = require('../controllers/companyUserController.js')
 const roleController = require('../controllers/roleController.js');
 const rightsController = require('../controllers/rightsController.js');
 const rightsStatusController = require('../controllers/rightsStatusController.js');
+const projectController = require('../controllers/projectController.js');
+const epicController = require('../controllers/epicController.js');
+const taskController = require('../controllers/taskController.js')
+const userPermissionController = require('../controllers/permissionsController.js');
+const userReports = require('../controllers/reportController.js');
 
 router.get('/users', userController.getUsers);
 router.post('/users', userController.createUser);
@@ -41,6 +46,36 @@ router.get('/rights/FineOne',authMiddleware, rightsController.RightsFindOne);
 router.patch('/rights/update/:rights_id',authMiddleware, rightsController.UpdateRights);
 router.delete('/rights/delete/:rights_id',authMiddleware, rightsController.DeleteRights);
 
+//Project Routes
+router.post('/project',authMiddleware, projectController.createProject);
+router.get('/project/view',authMiddleware,projectController.ViewProject);
+router.get('/project/FindOne',authMiddleware,projectController.projectFindOne);
+router.patch('/project/update/:project_id',authMiddleware,projectController.UpdateProject);
+router.delete('/project/delete/:project_id',authMiddleware,projectController.DeleteProject);
+
+//Epic Routes
+router.post('/epic', authMiddleware, epicController.createEpic);
+router.get('/epic/view', authMiddleware, epicController.ViewEpics);
+router.get('/epic/findone', authMiddleware, epicController.epicFindOne);
+router.patch('/epic/update/:epic_id', authMiddleware, epicController.UpdateEpic);
+router.delete('/epic/delete/:epic_id', authMiddleware, epicController.DeleteEpic);
+
+//Task Routes
+router.post('/task', authMiddleware, taskController.createTask);
+router.get('/task/view', authMiddleware, taskController.ViewTasks);
+router.get('/task/findone', authMiddleware, taskController.taskFindOne);
+router.patch('/task/update/:task_id', authMiddleware, taskController.UpdateTask);
+router.delete('/task/delete/:task_id', authMiddleware, taskController.DeleteTask);
+
+//user_permission Routes
+router.post('/user_permission', authMiddleware, userPermissionController.createUserPermission);
+router.get('/user_permission/view', authMiddleware, userPermissionController.viewUserPermissions);
+router.get('/user_permission/findone', authMiddleware, userPermissionController.findOneUserPermission);
+router.patch('/user_permission/update/:user_permission_id', authMiddleware, userPermissionController.updateUserPermission);
+router.delete('/user_permission/delete/:user_permission_id', authMiddleware, userPermissionController.deleteUserPermission);
+
+
+//Reports Routes 
 
 
 module.exports = router;
