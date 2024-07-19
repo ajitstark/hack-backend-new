@@ -15,6 +15,7 @@ const taskController = require('../controllers/taskController.js')
 const userPermissionController = require('../controllers/permissionsController.js');
 const userReports = require('../controllers/reportController.js');
 
+
 router.get('/users', userController.getUsers);
 router.post('/users', userController.createUser);
 
@@ -76,6 +77,6 @@ router.delete('/user_permission/delete/:user_permission_id', authMiddleware, use
 
 
 //Reports Routes 
-
+router.get('/report/taskList', authMiddleware, userReports.TaskList);
 
 module.exports = router;
