@@ -1,5 +1,31 @@
 const db = require('../config/db');
 
+
+
+// Create Project
+exports.getProjectList = async (req, res) => {
+    const { project_name } = req.body;
+    const inserted_userid = req.user.id; // Get user_id from session
+    const updated_userid = req.user_id; // Set updated_userid to same user
+
+    if (!project_name) {
+        return res.status(400).json({ error: 'Missing project_name' });
+    }
+
+    try {
+        // Insert into project_master
+        const [result] = await db.query(`
+            INSERT INTO project_master (project_name, inserted_userid, updated_userid, created_timestamp, updated_timestamp)
+            VALUES (?, ?, ?, NOW(), NOW())
+        `, [project_name, inserted_userid, updated_userid]);
+
+        return res.status(200).json({ message: 'Project created successfully', project_master_id: result.insertId });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+};
+
 // Create Project
 exports.createProject = async (req, res) => {
     const { project_name } = req.body;
@@ -34,13 +60,9 @@ exports.ViewProjects = async (req, res) => {
     }
 
     try {
-        const [projects] = await db.query(`
-            SELECT * 
-            FROM project_master 
-            WHERE company_userid = ?
-        `, [company_userid]);
-
-        res.status(200).json(projects);
+        let companyUserId = req.user.company_user_id
+        const [projects] = await db.query('SELECT * FROM project_master WHERE company_userid = ?', [companyUserId]);
+        res.status(200).json({status: 1, message: "fetched successfully", projects: projects});
     } catch (err) {
         console.error(err);
         res.status(500).json({ error: 'Internal Server Error' });

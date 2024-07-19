@@ -16,7 +16,7 @@ const userPermissionController = require('../controllers/permissionsController.j
 const userReports = require('../controllers/reportController.js');
 
 
-router.get('/users', userController.getUsers);
+router.get('/users', authMiddleware, userController.getUsers);
 router.post('/users', userController.createUser);
 
 router.post('/users/admin', userController.createAdminUser)
