@@ -1,6 +1,7 @@
 const db = require('../config/db');
 const jwt = require('jsonwebtoken');
-const bcrypt = require('bcrypt')
+const bcrypt = require('bcrypt');
+const { sendEmail } = require('../services/emailService.js');
 
 // Get all users
 exports.getUsers = async (req, res) => {
@@ -43,6 +44,13 @@ exports.createAdminUser = async (req, res) => {
       const [result] = await db.query('INSERT INTO users (company_user_id, user_name, email, password) VALUES (?, ?, ?, ?)', [company_user_id, user_name, email, hashedPassword]);
 
       const token = jwt.sign({ id: result.insertId, company_user_id: company_user_id, user_name, email }, process.env.JWT_SECRET, { expiresIn: '1h' });
+
+      await sendEmail(
+        `${email}`,
+        'Welcome to Our Service',
+        `Hi ${user_name}, welcome to our service!`,
+        `<p>Hi ${user_name},</p><p>Welcome to our service!</p>`
+      );
 
       return res.status(201).json({ id: result.insertId, user_name, email, token });
   } catch (err) {

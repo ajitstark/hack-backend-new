@@ -1,4 +1,5 @@
 const db = require('../config/db');
+const { sendEmail } = require('../services/emailService.js');
 
 // Create Task and Task Time Tracker
 exports.createTask = async (req, res) => {
@@ -225,11 +226,29 @@ exports.updateRightsStatus = async (req, res) => {
         // Insert into task_time_tracker with adjusted current time as start_time
         const [timeTrackerResult] = await connection.query(`
             INSERT INTO task_time_tracker (task_master_id, user_id, rights_status_id, comment, start_time)
-            VALUES (`+task_id+`, `+user_id+`, `+rights_status_id_to+`, '`+comment+`', CURRENT_TIMESTAMP())
-         `);
+            VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP())
+        `, [task_id, user_id, rights_status_id_to, comment]);
+
+        // Fetch user details from users table
+        const [user] = await connection.query('SELECT email, user_name FROM users WHERE users_id = ?', [user_id]);
+
+        if (user.length === 0) {
+            await connection.rollback();
+            connection.release();
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        const { email, user_name } = user[0];
 
         await connection.commit();
         connection.release();
+
+        await sendEmail(
+            email,
+            'Rights Status Updated',
+            `Hi ${user_name}, your rights status has been updated!`,
+            `<p>Hi ${user_name},</p><p>Your rights status has been updated!</p>`
+        );
 
         return res.status(200).json({ message: 'Rights status updated and task time tracker entry added successfully', task_master_id: task_id, task_time_tracker_id: timeTrackerResult.insertId });
     } catch (err) {
@@ -239,6 +258,7 @@ exports.updateRightsStatus = async (req, res) => {
         res.status(500).json({ error: 'Internal Server Error' });
     }
 };
+
 
 
 

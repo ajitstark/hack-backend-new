@@ -41,6 +41,153 @@ exports.listRightsStatus = async (req, res) => {
     }
 };
 
+exports.getTotalTimeSpentOnTasks = async (req, res) => {
+    try {
+        const [rows] = await db.query(`
+            SELECT
+                task_master.task_master_id,
+                task_master.task_title,
+                SUM(TIMESTAMPDIFF(SECOND, task_time_tracker.start_time, task_time_tracker.end_time)) AS total_time_spent_seconds
+            FROM
+                task_master
+            JOIN
+                task_time_tracker ON task_master.task_master_id = task_time_tracker.task_master_id
+            GROUP BY
+                task_master.task_master_id, task_master.task_title;
+        `);
+        res.status(200).json(rows);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+};
+
+
+exports.getTimeSpentByEachUser = async (req, res) => {
+    try {
+        const [rows] = await db.query(`
+            SELECT
+                users.user_id,
+                users.username,
+                SUM(TIMESTAMPDIFF(SECOND, task_time_tracker.start_time, task_time_tracker.end_time)) AS total_time_spent_seconds
+            FROM
+                users
+            JOIN
+                task_time_tracker ON users.user_id = task_time_tracker.user_id
+            GROUP BY
+                users.user_id, users.username;
+        `);
+        res.status(200).json(rows);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+};
+exports.getTasksWithMostTimeSpent = async (req, res) => {
+    try {
+        const [rows] = await db.query(`
+            SELECT
+                task_master.task_master_id,
+                task_master.task_title,
+                SUM(TIMESTAMPDIFF(SECOND, task_time_tracker.start_time, task_time_tracker.end_time)) AS total_time_spent_seconds
+            FROM
+                task_master
+            JOIN
+                task_time_tracker ON task_master.task_master_id = task_time_tracker.task_master_id
+            GROUP BY
+                task_master.task_master_id, task_master.task_title
+            ORDER BY
+                total_time_spent_seconds DESC
+            LIMIT 10;
+        `);
+        res.status(200).json(rows);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+};
+
+exports.getTaskStatusChangesOverTime = async (req, res) => {
+    try {
+        const [rows] = await db.query(`
+            SELECT
+                task_master.task_master_id,
+                task_master.task_title,
+                task_time_tracker.rights_status_id,
+                task_time_tracker.start_time
+            FROM
+                task_master
+            JOIN
+                task_time_tracker ON task_master.task_master_id = task_time_tracker.task_master_id
+            ORDER BY
+                task_master.task_master_id, task_time_tracker.start_time;
+        `);
+        res.status(200).json(rows);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+};
+
+exports.getTimeSpentOnTasksByProject = async (req, res) => {
+    try {
+        const [rows] = await db.query(`
+            SELECT
+                project_master.project_name,
+                task_master.task_master_id,
+                task_master.task_title,
+                SUM(TIMESTAMPDIFF(SECOND, task_time_tracker.start_time, task_time_tracker.end_time)) AS total_time_spent_seconds
+            FROM
+                project_master
+            JOIN
+                task_master ON project_master.project_master_id = task_master.project_id
+            JOIN
+                task_time_tracker ON task_master.task_master_id = task_time_tracker.task_master_id
+            GROUP BY
+                project_master.project_name, task_master.task_master_id, task_master.task_title;
+        `);
+        res.status(200).json(rows);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+};
+
+// Get Overall Project Report
+exports.getOverallProjectReport = async (req, res) => {
+    try {
+        const [rows] = await db.query(`
+        SELECT
+        project_master.project_master_id,
+        project_master.project_name,
+        task_master.task_master_id,
+        task_master.task_title,
+        users.users_id,
+        users.user_name,
+        SUM(TIMESTAMPDIFF(SECOND, task_time_tracker.start_time, task_time_tracker.end_time)) AS total_time_spent_seconds,
+        COUNT(DISTINCT task_time_tracker.task_master_id) AS total_tasks,
+        COUNT(DISTINCT task_time_tracker.user_id) AS total_users,
+        task_master.due_date
+    FROM
+        project_master
+    JOIN
+        task_master ON project_master.project_master_id = task_master.project_id
+    JOIN
+        task_time_tracker ON task_master.task_master_id = task_time_tracker.task_master_id
+    JOIN
+        users ON task_time_tracker.user_id = users.users_id
+    GROUP BY
+        project_master.project_master_id, project_master.project_name, task_master.task_master_id, task_master.task_title, users.users_id, users.user_name;
+    
+        `);
+        res.status(200).json(rows);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+};
+
+
 
 
 

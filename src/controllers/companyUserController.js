@@ -1,6 +1,7 @@
 const db = require('../config/db');
 const jwt = require('jsonwebtoken');
-const bcrypt = require('bcrypt')
+const bcrypt = require('bcrypt');
+const { sendEmail } = require('../services/emailService.js');
 
 
 // Create a new user
@@ -14,11 +15,21 @@ exports.createCompanyUser = async (req, res) => {
             const companyUserId = result.insertId
             const [resultCreateUser] = await db.query('INSERT INTO users (company_user_id, user_name, email, password) VALUES (?, ?, ?, ?)', [companyUserId, user_name, email, hashedPassword]);
             if(resultCreateUser.affectedRows === 1){
-                const token = jwt.sign({ id: result.insertId, company_user_id: companyUserId, user_name, email }, process.env.JWT_SECRET, { expiresIn: '1h' });
+                const token = jwt.sign({ id: result.insertId, company_user_id: companyUserId, user_name, email }, process.env.JWT_SECRET, { expiresIn: '24h' });
                 return res.status(201).json({ id: result.insertId, user_name, email, token });
-            }
+            }            
         }
+
+        await sendEmail(
+            to,
+            'Welcome to Our Service',
+            `Hi ${user_name}, welcome to our service!`,
+            `<p>Hi ${user_name},</p><p>Welcome to our service!</p>`
+          );
         return res.status(200).json({ id: result.insertId, name, email });
+
+        
+
     } catch (err) {
         console.error(err);
         res.status(500).json({ error: 'Internal Server Error' });

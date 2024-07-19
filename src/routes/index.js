@@ -82,4 +82,12 @@ router.delete('/user_permission/delete/:user_permission_id', authMiddleware, use
 //Reports Routes 
 router.get('/report/taskList', authMiddleware, userReports.TaskList);
 router.get('/report/statusList', authMiddleware, userReports.listRightsStatus);
+router.get('/report/total_time_spent_on_tasks', authMiddleware, userReports.getTotalTimeSpentOnTasks);
+router.get('/report/time_spent_by_each_user', authMiddleware, userReports.getTimeSpentByEachUser);
+router.get('/report/tasks_with_most_time_spent', authMiddleware, userReports.getTasksWithMostTimeSpent);
+router.get('/report/task_status_changes_over_time', authMiddleware, userReports.getTaskStatusChangesOverTime);
+router.get('/report/time_spent_on_tasks_by_project', authMiddleware, userReports.getTimeSpentOnTasksByProject);
+router.get('/report/overall_project', authMiddleware, userReports.getOverallProjectReport);
+
+
 module.exports = router;
