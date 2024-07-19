@@ -60,9 +60,29 @@ exports.RightsFindOne = async (req, res) => {
         }
 
         // Combine results
+        const rightsMap = {};
+
+        result1.forEach(row => {
+            if (!rightsMap[row.user_rights_id]) {
+                rightsMap[row.user_rights_id] = {
+                    user_rights_id: row.user_rights_id,
+                    user_roles_id: row.user_roles_id,
+                    role_name: row.role_name,
+                    user_name: row.user_name,
+                    email: row.email,
+                    userwise_rights: []
+                };
+            }
+        });
+
+        result2.forEach(row => {
+            if (rightsMap[row.user_rights_id]) {
+                rightsMap[row.user_rights_id].userwise_rights.push(row.rights_status_id);
+            }
+        });
+
         const response = {
-            detailedInfo: result1,
-            basicInfo: result2
+            user_rights: Object.values(rightsMap)
         };
 
         // Send combined response
@@ -72,6 +92,7 @@ exports.RightsFindOne = async (req, res) => {
         res.status(500).json({ error: 'Internal Server Error' });
     }
 };
+
 
 exports.UpdateRights = async (req, res) => {
     const { rights_id } = req.params;
