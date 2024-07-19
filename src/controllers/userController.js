@@ -2,6 +2,9 @@ const db = require('../config/db');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt')
 
+const { sendEmail } = require('../services/emailService.js');
+
+
 // Get all users
 exports.getUsers = async (req, res) => {
   try {
@@ -86,6 +89,16 @@ exports.createUser = async (req, res) => {
 
       // Insert the new user into the database
       const [result] = await db.query('INSERT INTO users (company_user_id, user_name, email, password) VALUES (?, ?, ?, ?)', [companyUserId, user_name, email, hashedPassword]);
+
+      //Email Notification
+
+      // Send a welcome email
+      await sendEmail(
+        "amazingajit7@gmail.com",
+        'Welcome to Our Service',
+        `Hi ${user_name}, welcome to our service!`,
+        `<p>Hi ${user_name},</p><p>Welcome to our service!</p>`
+      );
 
       // Generate a new JWT token
       //const newToken = jwt.sign({ id: result.insertId, company_user_id, user_name, email }, process.env.JWT_SECRET, { expiresIn: '1h' });

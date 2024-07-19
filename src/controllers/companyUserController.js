@@ -14,7 +14,7 @@ exports.createCompanyUser = async (req, res) => {
             const companyUserId = result.insertId
             const [resultCreateUser] = await db.query('INSERT INTO users (company_user_id, user_name, email, password) VALUES (?, ?, ?, ?)', [companyUserId, user_name, email, hashedPassword]);
             if(resultCreateUser.affectedRows === 1){
-                const token = jwt.sign({ id: result.insertId, company_user_id: companyUserId, user_name, email }, process.env.JWT_SECRET, { expiresIn: '1h' });
+                const token = jwt.sign({ id: result.insertId, company_user_id: companyUserId, user_name, email }, process.env.JWT_SECRET);
                 return res.status(201).json({ id: result.insertId, user_name, email, token });
             }
         }
