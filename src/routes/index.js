@@ -15,6 +15,7 @@ const taskController = require('../controllers/taskController.js')
 const userPermissionController = require('../controllers/permissionsController.js');
 const userReports = require('../controllers/reportController.js');
 
+
 router.get('/users', authMiddleware, userController.getUsers);
 router.post('/users', userController.createUser);
 
@@ -40,15 +41,15 @@ router.patch('/rightsStatus/update/:rights_status_id',authMiddleware,rightsStatu
 router.delete('/rightsStatus/delete/:rights_status_id',authMiddleware,rightsStatusController.DeleteRightsStatus);
 
 //Rights Routes
-router.post('/rights', authMiddleware, rightsController.createRights);
+router.post('/rights', authMiddleware, rightsController.createUserRights);
 //router.get('/rights/view',authMiddleware, rightsController.ViewRights);
-router.get('/rights/FineOne',authMiddleware, rightsController.RightsFindOne); 
-router.patch('/rights/update/:rights_id',authMiddleware, rightsController.UpdateRights);
-router.delete('/rights/delete/:rights_id',authMiddleware, rightsController.DeleteRights);
+router.get('/rights/FineOne',authMiddleware, rightsController.userRightsFindOne); 
+router.patch('/rights/update/:rights_id',authMiddleware, rightsController.UpdateUserRights);
+router.delete('/rights/delete/:rights_id',authMiddleware, rightsController.DeleteUserRights);
 
 //Project Routes
 router.post('/project',authMiddleware, projectController.createProject);
-router.get('/project/view',authMiddleware,projectController.ViewProject);
+router.get('/project/view',authMiddleware,projectController.ViewProjects);
 router.get('/project/FindOne',authMiddleware,projectController.projectFindOne);
 router.patch('/project/update/:project_id',authMiddleware,projectController.UpdateProject);
 router.delete('/project/delete/:project_id',authMiddleware,projectController.DeleteProject);
@@ -66,6 +67,9 @@ router.get('/task/view', authMiddleware, taskController.ViewTasks);
 router.get('/task/findone', authMiddleware, taskController.taskFindOne);
 router.patch('/task/update/:task_id', authMiddleware, taskController.UpdateTask);
 router.delete('/task/delete/:task_id', authMiddleware, taskController.DeleteTask);
+router.post('/task/update_rights_status', authMiddleware, taskController.updateRightsStatus);
+router.post('/task_time_tracker', authMiddleware, taskController.createTaskTimeTracker);
+router.get('/task_time_tracker/view', authMiddleware, taskController.ViewTaskTimeTrackers);
 
 //user_permission Routes
 router.post('/user_permission', authMiddleware, userPermissionController.createUserPermission);
@@ -76,6 +80,6 @@ router.delete('/user_permission/delete/:user_permission_id', authMiddleware, use
 
 
 //Reports Routes 
-
-
+router.get('/report/taskList', authMiddleware, userReports.TaskList);
+router.get('/report/statusList', authMiddleware, userReports.listRightsStatus);
 module.exports = router;
