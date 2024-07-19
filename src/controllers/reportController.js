@@ -31,5 +31,17 @@ exports.TaskList = async (req, res) => {
     }
 };
 
+exports.listRightsStatus = async (req, res) => {
+    try {
+        const [rightsStatus] = await db.query('SELECT * FROM rights_status');
+        res.status(200).json(rightsStatus);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+};
+
+
+
 
 
